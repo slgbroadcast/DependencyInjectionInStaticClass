@@ -8,17 +8,8 @@
         <Product>Dependency Injection In Static Class</Product>
         <AssemblyVersion>1.0.0.0</AssemblyVersion>
         <FileVersion>1.0.0.0</FileVersion>
-        <ApplicationIcon>..\slg.ico</ApplicationIcon>
+        <ApplicationIcon>slg.ico</ApplicationIcon>
     </PropertyGroup>
-
-    <ItemGroup>
-        <None Include="..\slg.ico">
-            <Link>slg.ico</Link>
-        </None>
-        <None Update="LICENSE">
-          <DependentUpon>slg.ico</DependentUpon>
-        </None>
-    </ItemGroup>
 
     <ItemGroup>
         <PackageReference Include="JetBrains.Annotations" Version="2024.3.0" />
