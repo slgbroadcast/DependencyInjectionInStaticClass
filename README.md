@@ -1,18 +1,21 @@
-# Dependency injection in a static class
+# Dependency Injection in a Static Class
 
-This is an example project which shows how dependency injection can be used in a `static` class.
+This project demonstrates how dependency injection can be effectively used in a`static` class.  
+Static classes inherently lack dependency injection support, so using a mechanism like
+`IServiceScope` is essential to ensure that service lifetimes are correctly maintained as per the services registered scopes.
 
-To ensure that the [lifetime](https://learn.microsoft.com/en-us/dotnet/core/extensions/dependency-injection#service-lifetimes)
-of the services continues to work the same way as the services were registered,
-it is important that if a service is used in a static class, this is done via a `IServiceScope`.  
-The `IServiceScope` guaranties that the services will be correctly disposed if it is required.
+When working with `scoped` or `transient` services, using
+`IServiceScope` ensures proper disposal of these services after they are used,
+preventing resource leaks and preserving intended lifetimes.
 
-To achieve these, we create a
-`ApplicationServiceProvider` ([ApplicationServiceProvider.cs](DependencyInjectionInStaticClass/ApplicationServiceProvider.cs))
-class which holds the application.
-From this application we can get the services.
+## Application Service Provider
 
-```csharp asd
+To enable dependency injection within a static context, the
+`ApplicationServiceProvider` class ([ApplicationServiceProvider.cs](DependencyInjectionInStaticClass/ApplicationServiceProvider.cs)) is created.  
+This static service provider holds the application's host instance and provides methods for retrieving services with proper scope management.  
+The class offers two key methods:
+
+```csharp
 public static class ApplicationServiceProvider
 {
     private static  IHost?      ApplicationHost;
@@ -22,11 +25,15 @@ public static class ApplicationServiceProvider
 }
 ```
 
-Since we have to respect the lifetime of services, we create a new `ServiceScope` and use the
-`ServiceProvider` from the `serviceScope`.  
-Now we have access to all the services.
-It is important, that `Scoped` and `Transient` services are disposed correctly after using.  
-To achieve this, we have to dispose the `serviceScope`.
+### Ensuring Correct Service Lifetime Management
+
+Since `Scoped` and `Transient` services need to be disposed of after usage, it’s necessary to create a new
+`ServiceScope` each time services are accessed within the static class.  
+This can be achieved by calling `ApplicationHost.Services.CreateScope()`.
+Using `ServiceProvider` from this `serviceScope`,
+we can access services while guaranteeing that they are disposed of correctly once their usage is complete.
+
+Example:
 
 ```csharp
 using (IServiceScope serviceScope = ApplicationHost.Services.CreateScope())
@@ -36,9 +43,13 @@ using (IServiceScope serviceScope = ApplicationHost.Services.CreateScope())
 }
 ```
 
-To get simple and fast access to the services and also remember to dispose the `ServiceScope`,
-we create a function (`GetRequiredService`) that returns `IDisposable` and has the services as an `out` parameter.
-Example:
+### Simplified Service Access with Disposal Safety
+
+To streamline access to services while ensuring that the `ServiceScope` is disposed of properly,
+`ApplicationServiceProvider` provides a `GetRequiredService` method. This method uses an
+`out` parameter for the service instance and returns an `IDisposable` scope that must be disposed of after usage.
+
+Example usage:
 
 ```csharp
 using (ApplicationServiceProvider.GetRequiredService(out NestedService nestedService))
@@ -46,3 +57,5 @@ using (ApplicationServiceProvider.GetRequiredService(out NestedService nestedSer
     nestedService.MakeSound();
 }
 ```
+
+This pattern ensures that all resources are managed correctly while making service access straightforward and reducing boilerplate code.
