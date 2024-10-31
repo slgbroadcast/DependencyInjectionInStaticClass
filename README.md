@@ -1,4 +1,4 @@
-# Dependency Injection in a Static Class
+[# Dependency Injection in a Static Class
 
 This project demonstrates how dependency injection can be effectively used in a`static` class.  
 Static classes inherently lack dependency injection support, so using a mechanism like
@@ -12,8 +12,9 @@ preventing resource leaks and preserving intended lifetimes.
 
 To enable dependency injection within a static context, the
 `ApplicationServiceProvider` class ([ApplicationServiceProvider.cs](DependencyInjectionInStaticClass/ApplicationServiceProvider.cs)) is created.  
-This static service provider holds the application's host instance and provides methods for retrieving services with proper scope management.  
-The class offers two key methods:
+This static service provider holds the application's host instance and provides methods for retrieving services with proper scope management.
+
+Preview:
 
 ```csharp
 public static class ApplicationServiceProvider
@@ -38,8 +39,7 @@ Example:
 ```csharp
 using (IServiceScope serviceScope = ApplicationHost.Services.CreateScope())
 {
-    var serviceProvider = serviceScope.ServiceProvider;
-    return serviceProvider.GetRequiredService<NestedService>();
+    return serviceScope.ServiceProvider.GetRequiredService<NestedService>();
 }
 ```
 
@@ -48,6 +48,22 @@ using (IServiceScope serviceScope = ApplicationHost.Services.CreateScope())
 To streamline access to services while ensuring that the `ServiceScope` is disposed of properly,
 `ApplicationServiceProvider` provides a `GetRequiredService` method. This method uses an
 `out` parameter for the service instance and returns an `IDisposable` scope that must be disposed of after usage.
+
+GetRequiredService:
+
+```csharp
+public static IDisposable GetRequiredService<T>(out T service)
+    where T : notnull
+{
+    if (ApplicationHost is null)
+    {
+        throw new InvalidOperationException($"{nameof(ApplicationHost)} is not set. Call {nameof(SetApplication)}() first.");
+    }
+    IDisposable serviceScope = GetServiceProvider(out IServiceProvider serviceProvider);
+    service = serviceProvider.GetRequiredService<T>();
+    return serviceScope;
+}
+```
 
 Example usage:
 
@@ -59,3 +75,11 @@ using (ApplicationServiceProvider.GetRequiredService(out NestedService nestedSer
 ```
 
 This pattern ensures that all resources are managed correctly while making service access straightforward and reducing boilerplate code.
+
+### Full Implementation
+
+The full implementation of `ApplicationServiceProvider` can be found here:
+[ApplicationServiceProvider.cs](DependencyInjectionInStaticClass/ApplicationServiceProvider.cs).
+
+You can start this Blazor project and view the dependency injection setup in action on the `Static Injection` page,
+which demonstrates the injection process using [StaticClass.cs](DependencyInjectionInStaticClass/StaticClass.cs).
