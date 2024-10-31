@@ -5,6 +5,7 @@ namespace DependencyInjectionInStaticClass;
 /// <summary>
 ///     A static service provider that holds the current running application.
 /// </summary>
+/// <seealso href="https://learn.microsoft.com/en-us/dotnet/core/extensions/dependency-injection-guidelines#disposal-of-services"/>
 public static class ApplicationServiceProvider
 {
     private static IHost? ApplicationHost;
