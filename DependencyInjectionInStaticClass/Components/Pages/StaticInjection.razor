@@ -1,0 +1,18 @@
+﻿@page "/StaticInjection"
+
+<PageTitle>Static Injection</PageTitle>
+
+<h1>Static Injection</h1>
+
+<p>
+    Use one of the buttons below to use the services injected into a static class.<br/>
+    Check the console output to see the results.
+</p>
+
+<button class="btn btn-primary" @onclick="StaticClass.UseSimpleServices">Use simple services once</button>
+<br/>
+
+<button class="btn btn-primary" @onclick="StaticClass.UseSimpleServicesMultipleTimes">Use simple services multiple times</button>
+<br/>
+
+<button class="btn btn-primary" @onclick="StaticClass.UseNestedServices">Use nested service</button>
