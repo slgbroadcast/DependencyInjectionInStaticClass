@@ -1,4 +1,4 @@
-[# Dependency Injection in a Static Class
+# Dependency Injection in a Static Class
 
 This project demonstrates how dependency injection can be effectively used in a`static` class.  
 Static classes inherently lack dependency injection support, so using a mechanism like
