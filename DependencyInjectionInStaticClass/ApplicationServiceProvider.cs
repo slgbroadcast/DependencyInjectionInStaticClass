@@ -34,6 +34,16 @@ public static class ApplicationServiceProvider
     /// <param name="serviceProvider"><b>out</b> The <see cref="IServiceProvider" /> from the <see cref="ApplicationHost" />.</param>
     /// <returns>The <see cref="IServiceScope" /> that <b>must</b> be disposed!</returns>
     /// <exception cref="InvalidOperationException">The <see cref="ApplicationHost" /> is not set.</exception>
+    /// <example>
+    ///     <code>
+    /// using (ApplicationServiceProvider.GetServiceProvider(out IServiceProvider serviceProvider))
+    /// {
+    ///     SingletonService singletonService = serviceProvider.GetRequiredService&lt;SingletonService&gt;();
+    ///     ScopedService    scopedService    = serviceProvider.GetRequiredService&lt;ScopedService&gt;();
+    ///     TransientService transientService = serviceProvider.GetRequiredService&lt;TransientService&gt;();
+    /// }
+    /// </code>
+    /// </example>
     /// <seealso cref="GetRequiredService{T}" />
     [MustDisposeResource]
     public static IDisposable GetServiceProvider(out IServiceProvider serviceProvider)
@@ -60,6 +70,15 @@ public static class ApplicationServiceProvider
     /// <typeparam name="T">The type of service to get.</typeparam>
     /// <returns>The <see cref="IServiceScope" /> that <b>must</b> be disposed!</returns>
     /// <exception cref="InvalidOperationException">The <see cref="ServiceProvider" /> is not set.</exception>
+    /// <example>
+    ///     <code>
+    /// using (ApplicationServiceProvider.GetRequiredService(out MyService service))
+    /// {
+    ///     service.MakeSound();
+    /// }
+    /// </code>
+    /// </example>
+    /// <seealso cref="GetServiceProvider"/>
     [MustDisposeResource]
     public static IDisposable GetRequiredService<T>(out T service)
         where T : notnull
