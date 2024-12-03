@@ -17,7 +17,7 @@ preventing resource leaks and preserving intended lifetimes.
 ## Application Service Provider
 
 To enable dependency injection within a static context, the
-`ApplicationServiceProvider` class ([ApplicationServiceProvider.cs](DependencyInjectionInStaticClass/ApplicationServiceProvider.cs)) is created.  
+`ApplicationServiceProvider` [class](DependencyInjectionInStaticClass/ApplicationServiceProvider.cs) is created.  
 This static service provider holds the application's host instance and provides methods for retrieving services with proper scope management.
 
 Preview:
