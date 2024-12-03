@@ -100,6 +100,16 @@ using (ApplicationServiceProvider.GetRequiredService(out NestedService nestedSer
 }
 ```
 
+Example when multiple services are required
+```csharp
+using (ApplicationServiceProvider.GetServiceProvider(out IServiceProvider serviceProvider))
+{
+    SingletonService singletonService = serviceProvider.GetRequiredService<SingletonService>();
+    ScopedService    scopedService    = serviceProvider.GetRequiredService<ScopedService>();
+    TransientService transientService = serviceProvider.GetRequiredService<TransientService>();
+}
+```
+
 This pattern ensures that all resources are managed correctly while making service access straightforward and reducing boilerplate code.
 
 ### Full Implementation
