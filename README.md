@@ -8,10 +8,16 @@ When working with `scoped` or `transient` services, using
 `IServiceScope` ensures proper disposal of these services after they are used,
 preventing resource leaks and preserving intended lifetimes.
 
+## TL;DR
+
+* **Copy** the `ApplicationServiceProvider` [class](DependencyInjectionInStaticClass/ApplicationServiceProvider.cs) into your project.
+* **[Set the application](#set-the-application-service-provider)** by calling `ApplicationServiceProvider.SetApplication(app)` after building your application.
+* **Get a service** using `ApplicationServiceProvider.GetRequiredService<T>(out T service)` with proper disposal.
+
 ## Application Service Provider
 
 To enable dependency injection within a static context, the
-`ApplicationServiceProvider` class ([ApplicationServiceProvider.cs](DependencyInjectionInStaticClass/ApplicationServiceProvider.cs)) is created.  
+`ApplicationServiceProvider` [class](DependencyInjectionInStaticClass/ApplicationServiceProvider.cs) is created.  
 This static service provider holds the application's host instance and provides methods for retrieving services with proper scope management.
 
 Preview:
@@ -24,6 +30,26 @@ public static class ApplicationServiceProvider
     public  static  IDisposable GetServiceProvider(out IServiceProvider serviceProvider);
     public  static  IDisposable GetRequiredService<T>(out T service);
 }
+```
+
+### Set the Application Service Provider
+
+Before using the `ApplicationServiceProvider` for accessing services, it is necessary to set the application host.  
+This is achieved by calling `ApplicationServiceProvider.SetApplication()`
+and passing the built application (e.g., an `IHost` or `WebApplication`) as a parameter.  
+This step ensures that the static service provider has access to the application's dependency injection container.
+
+Ensure this is done **after creating the application from the builder**
+but **before accessing any services through the** `ApplicationServiceProvider`.
+
+Example usage in `Program.cs`:
+
+```csharp
+// Create the application (WebApplication)
+WebApplication app = builder.Build();
+
+// Set the application host for the service provider
+ApplicationServiceProvider.SetApplication(app);
 ```
 
 ### Ensuring Correct Service Lifetime Management
