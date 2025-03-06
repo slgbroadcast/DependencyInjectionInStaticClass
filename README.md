@@ -11,8 +11,15 @@ preventing resource leaks and preserving intended lifetimes.
 ## TL;DR
 
 * **Copy** the `ApplicationServiceProvider` [class](DependencyInjectionInStaticClass/ApplicationServiceProvider.cs) into your project.
-* **[Set the application](#set-the-application-service-provider)** by calling `ApplicationServiceProvider.SetApplication(app)` after building your application.
+* **[Set the service Provider](#set-the-application-service-provider)** by calling `ApplicationServiceProvider.SetServiceProvider(app.Services)` after building your application.
 * **Get a service** using `ApplicationServiceProvider.GetRequiredService<T>(out T service)` with proper disposal.
+
+
+XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+Anpassen
+XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 
 ## Application Service Provider
 
@@ -25,10 +32,11 @@ Preview:
 ```csharp
 public static class ApplicationServiceProvider
 {
-    private static  IHost?      ApplicationHost;
-    public  static  void        SetApplication(IHost applicationHost);
-    public  static  IDisposable GetServiceProvider(out IServiceProvider serviceProvider);
-    public  static  IDisposable GetRequiredService<T>(out T service);
+    private static IServiceProvider? ServiceProvider;
+    public static  void              SetApplication(IHost                          applicationHost);
+    public static  void              SetServiceProvider(IServiceProvider           serviceProvider);
+    public static  IDisposable       GetScopedServiceProvider(out IServiceProvider serviceProvider);
+    public static  IDisposable       GetRequiredService<T>(out    T                service);
 }
 ```
 

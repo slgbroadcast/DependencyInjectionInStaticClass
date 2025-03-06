@@ -9,7 +9,7 @@ public static class StaticClass
         Console.Out.WriteLine("Make sound with simple services:");
 
         // We use "GetServiceProvider" so we are able to use multiple services.
-        using (ApplicationServiceProvider.GetServiceProvider(out IServiceProvider serviceProvider))
+        using (ApplicationServiceProvider.GetScopedServiceProvider(out IServiceProvider serviceProvider))
         {
             SingletonService singletonService = serviceProvider.GetRequiredService<SingletonService>();
             singletonService.MakeSound();
@@ -31,7 +31,7 @@ public static class StaticClass
         Console.Out.WriteLine("Make multiple sounds with simple services:");
 
         // We use "GetServiceProvider" so we are able to use multiple services.
-        using (ApplicationServiceProvider.GetServiceProvider(out IServiceProvider serviceProvider))
+        using (ApplicationServiceProvider.GetScopedServiceProvider(out IServiceProvider serviceProvider))
         {
             Console.Out.WriteLine("Get services for the first time");
             SingletonService singletonService = serviceProvider.GetRequiredService<SingletonService>();

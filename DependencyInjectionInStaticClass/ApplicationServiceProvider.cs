@@ -1,38 +1,51 @@
 namespace DependencyInjectionInStaticClass;
 
 /// <summary>
-///     A static service provider that holds the current running application.
+///     A static service provider that holds the current used <see cref="IServiceProvider" />.
 /// </summary>
 /// <seealso href="https://learn.microsoft.com/en-us/dotnet/core/extensions/dependency-injection-guidelines#disposal-of-services" />
 public static class ApplicationServiceProvider
 {
-    private static IHost? ApplicationHost;
+    private static IServiceProvider? ServiceProvider;
 
     /// <summary>
-    ///     Sets the application host from which services can be used.
+    ///     Sets the <see cref="ServiceProvider" /> from the given <paramref name="applicationHost" />.
     /// </summary>
     /// <param name="applicationHost">The application host instance.</param>
     /// <remarks>
     ///     You get the host from the <see cref="IHostApplicationBuilder" /> after build.
     /// </remarks>
-    /// <exception cref="ArgumentNullException"><paramref name="applicationHost" /> is <c>null</c></exception>
+    /// <exception cref="ArgumentNullException"><paramref name="applicationHost" /> is <c>null</c>.</exception>
     public static void SetApplication(IHost applicationHost)
     {
         ArgumentNullException.ThrowIfNull(applicationHost);
 
-        ApplicationHost = applicationHost;
+        ServiceProvider = applicationHost.Services;
+    }
+
+    /// <summary>
+    ///     Sets the <see cref="ServiceProvider" /> that will be used to get services from.
+    /// </summary>
+    /// <param name="serviceProvider">The service provider to use.</param>
+    /// <exception cref="ArgumentNullException"><paramref name="serviceProvider" /> is <c>null</c>.</exception>
+    public static void SetServiceProvider(IServiceProvider serviceProvider)
+    {
+        ArgumentNullException.ThrowIfNull(serviceProvider);
+
+        ServiceProvider = serviceProvider;
     }
 
     /// <summary>
     ///     Offers a scoped <see cref="IServiceProvider" />.<br />
-    ///     Returns an <see cref="IDisposable" /> scope which must be disposed to close the scope and release the service resources.
+    ///     Returns an <see cref="IDisposable" /> (<see cref="IServiceScope" />)
+    ///     which must be disposed to close the scope and release the service resources.
     /// </summary>
     /// <remarks>
     ///     If only one service is required, use <see cref="GetRequiredService{T}" />.
     /// </remarks>
-    /// <param name="serviceProvider"><b>out</b> The <see cref="IServiceProvider" /> from the <see cref="ApplicationHost" />.</param>
+    /// <param name="serviceProvider"><b>out</b> The scoped <see cref="IServiceProvider" /> from the <see cref="ServiceProvider" />.</param>
     /// <returns>The <see cref="IServiceScope" /> that <b>must</b> be disposed!</returns>
-    /// <exception cref="InvalidOperationException">The <see cref="ApplicationHost" /> is not set.</exception>
+    /// <exception cref="InvalidOperationException">The <see cref="ServiceProvider" /> is not set.</exception>
     /// <example>
     ///     <code>
     /// using (ApplicationServiceProvider.GetServiceProvider(out IServiceProvider serviceProvider))
@@ -44,14 +57,11 @@ public static class ApplicationServiceProvider
     /// </code>
     /// </example>
     /// <seealso cref="GetRequiredService{T}" />
-    public static IDisposable GetServiceProvider(out IServiceProvider serviceProvider)
+    public static IDisposable GetScopedServiceProvider(out IServiceProvider serviceProvider)
     {
-        if (ApplicationHost is null)
-        {
-            throw new InvalidOperationException($"{nameof(ApplicationHost)} is not set. Call {nameof(SetApplication)}() first.");
-        }
+        ThrowIfIsNull(ServiceProvider);
 
-        IServiceScope serviceScope = ApplicationHost.Services.CreateScope();
+        IServiceScope serviceScope = ServiceProvider.CreateScope();
 
         serviceProvider = serviceScope.ServiceProvider;
         return serviceScope;
@@ -59,15 +69,17 @@ public static class ApplicationServiceProvider
 
     /// <summary>
     ///     Offers an instance of a required service <typeparamref name="T" />.<br />
-    ///     This method returns a scoped <see cref="IDisposable" />, which must be disposed to close the scope.
+    ///     Returns an <see cref="IDisposable" /> (<see cref="IServiceScope" />)
+    ///     which must be disposed to close the scope and release the service resources.
     /// </summary>
     /// <remarks>
-    ///     If multiple services are required, use <see cref="GetServiceProvider" />.
+    ///     If multiple services are required, use <see cref="GetScopedServiceProvider" />.
     /// </remarks>
     /// <param name="service"><b>out</b> The required service.</param>
     /// <typeparam name="T">The type of service to get.</typeparam>
     /// <returns>The <see cref="IServiceScope" /> that <b>must</b> be disposed!</returns>
     /// <exception cref="InvalidOperationException">The <see cref="ServiceProvider" /> is not set.</exception>
+    /// <exception cref="System.InvalidOperationException">There is no service of type <typeparamref name="T" />.</exception>
     /// <example>
     ///     <code>
     /// using (ApplicationServiceProvider.GetRequiredService(out MyService service))
@@ -76,18 +88,30 @@ public static class ApplicationServiceProvider
     /// }
     /// </code>
     /// </example>
-    /// <seealso cref="GetServiceProvider" />
+    /// <seealso cref="GetScopedServiceProvider" />
     public static IDisposable GetRequiredService<T>(out T service)
         where T : notnull
     {
-        if (ApplicationHost is null)
-        {
-            throw new InvalidOperationException($"{nameof(ApplicationHost)} is not set. Call {nameof(SetApplication)}() first.");
-        }
+        ThrowIfIsNull(ServiceProvider);
 
-        IDisposable serviceScope = GetServiceProvider(out IServiceProvider serviceProvider);
+        IDisposable serviceScope = GetScopedServiceProvider(out IServiceProvider serviceProvider);
         service = serviceProvider.GetRequiredService<T>();
 
         return serviceScope;
+    }
+
+    /// <summary>
+    ///     Throws an <see cref="InvalidOperationException" />
+    ///     if the given <paramref name="serviceProvider" /> is <c>null</c>.
+    /// </summary>
+    /// <param name="serviceProvider">The service provider to check.</param>
+    /// <exception cref="InvalidOperationException"><paramref name="serviceProvider" /> is <c>null</c>.</exception>
+    private static void ThrowIfIsNull([System.Diagnostics.CodeAnalysis.NotNull] IServiceProvider? serviceProvider)
+    {
+        if (serviceProvider is null)
+        {
+            throw new InvalidOperationException($"Unable to get service. {nameof(ServiceProvider)} is not set. " +
+                                                $"Call '{nameof(ApplicationServiceProvider)}.{nameof(SetServiceProvider)}()' first.");
+        }
     }
 }
